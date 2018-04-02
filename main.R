@@ -9,9 +9,6 @@ csvInput = function(filename){
 }
 
 filenameInterpret = function(filename){
-#ielasa filename
-#interpretē no filename nosaukuma eksperimenta parametrus
-#output: lambda, color, a, d, distance, mērījums pēc kārtas	
 }
 
 destroyTrash = function(vertibafilenamemainigajam){
@@ -34,3 +31,34 @@ magicBox = function(){
 # for (i in 1:length(data)){
 	# izsauc visas funkcijas
 # }
+
+word = "a004b025r340_1.csv"
+a = c('004','008')
+b = c('025','055','05','005')
+colors = c('g', 'r')
+distances = c('340','440','580')
+measurementCounter=c(sprintf("_%.f", seq(1,4,1)))
+
+shit = function(word, parameter){
+	for (char in 1:length(word)){
+		for (i in 1:length(parameter)){
+			if (grepl(parameter[i], word[char])){
+				return(parameter[i])
+			}
+		}
+	}
+}
+
+
+color = shit(word, colors)
+ai = shit(word, a)
+bi = shit(word, b)
+distance = shit(word, distances)
+turn = shit(word, measurementCounter)
+
+print(word)
+print(color)
+print(ai)
+print(bi)
+print(distance)
+print(turn)
