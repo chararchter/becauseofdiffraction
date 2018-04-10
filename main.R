@@ -62,12 +62,18 @@ plot = function(i){
 
 position = (filename[, 'position'])
 relativeIntensity = (filename[, 'relativeIntensity'])
-# create new dataset without missing data
-newdata <- na.omit(position) 
-print(length(newdata))
-print(length(relativeIntensity))
+data = data.frame(position, relativeIntensity)
+print(head(data))
+newdata = na.omit(data)
 
-print(is.na(relativeIntensity))
+print(head(newdata))
+
+# create new dataset without missing data
+# newdata <- na.omit(position) 
+# print(length(newdata))
+# print(length(relativeIntensity))
+
+# print(is.na(relativeIntensity))
 # print(newdata)
 # print(position)
 # print(head(filename))
@@ -76,10 +82,10 @@ print(is.na(relativeIntensity))
 # print(relativeIntensity)
 # print(x)
 # print(y)
-# splains = smooth.spline(x, y)
+# splains = smooth.spline(position, relativeIntensity)
 # plot.new()
 # jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 900, height = 500, units = "px", pointsize = 10)
-# plot(x, y, pch=20, xlim =c(0,3500), col = "gray25", xlab = "Position",
+# plot(position, relativeIntensity, pch=20, xlim =c(0,3500), col = "gray25", xlab = "Position",
 # 	ylab="Relative intensity", cex.axis = 1.5, cex.lab=1.5)
 # lines(splains, col = "blue")
 # title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
