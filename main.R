@@ -39,19 +39,6 @@ filenameInterpret = function(filename){
 	return(c(color, ai, bi, distance, turn))
 }
 
-destroyTrash = function(filename){
-# input: variable - filename; value - filename ielasītie dati
-# output: divi vektori - pozīcija un relativeIntensity
-# piešķir jaunu mainīgo relevantajām kolonām vai piešķir jaunu vērtību esošajiem mainīgajiem (tikai šīs 2 kolonas)
-# relativeIntensity = data$relativeIntensity
-# position = data$position
-# [position, relativeIntensity] = filename[,c('position','relativeIntensity')]
-# vai arī šis ir lieks un plotojot vnk lietot filename tabulu tā it kā es saprotu abstrakcijas
-position = (filename[, 'position'])
-relativeIntensity = (filename[, 'relativeIntensity'])
-return(c(position, relativeIntensity))
-}
-
 plot = function(i){
 # input ir destroyTrash output
 # output = destroyTrash(filename)
