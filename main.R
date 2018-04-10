@@ -39,47 +39,36 @@ filenameInterpret = function(filename){
 	return(c(color, ai, bi, distance, turn))
 }
 
-plot = function(i){
-# input ir destroyTrash output
-# output = destroyTrash(filename)
-# x = output[1]
-# y = output[2]
-# # print(head(output))
-# print(output)
+plotData = function(i){
+	position = (filename[, 'position'])
+	relativeIntensity = (filename[, 'relativeIntensity'])
+	dataRaw = data.frame(position, relativeIntensity)
+	data = na.omit(dataRaw)
 
-position = (filename[, 'position'])
-relativeIntensity = (filename[, 'relativeIntensity'])
-data = data.frame(position, relativeIntensity)
-print(head(data))
-newdata = na.omit(data)
+	position = data[, 'position']
+	relativeIntensity = data[, 'relativeIntensity']
 
-print(head(newdata))
+	# print(length(position))
+	# print(length(relativeIntensity))
+	# print(position)
+	# print(relativeIntensity)
+	print(i)
+	#print(data[, 'position'])
+	splains = smooth.spline(position, relativeIntensity)
 
-# create new dataset without missing data
-# newdata <- na.omit(position) 
-# print(length(newdata))
-# print(length(relativeIntensity))
-
-# print(is.na(relativeIntensity))
-# print(newdata)
-# print(position)
-# print(head(filename))
-# print(filename[, 'position'])
-# print(filename[, 'relativeIntensity'])
-# print(relativeIntensity)
-# print(x)
-# print(y)
-# splains = smooth.spline(position, relativeIntensity)
-# plot.new()
-# jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 900, height = 500, units = "px", pointsize = 10)
-# plot(position, relativeIntensity, pch=20, xlim =c(0,3500), col = "gray25", xlab = "Position",
-# 	ylab="Relative intensity", cex.axis = 1.5, cex.lab=1.5)
-# lines(splains, col = "blue")
-# title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
-# abline(v=(seq(0,3500,100)), col="burlywood4", lty="dotted")
-# abline(h=(seq(0,12,0.5)), col="burlywood2", lty="dotted")
-# dev.off()
+	# position = c(2,3,4,6)
+	# relativeIntensity = c(5,5,2,7)
+	plot.new()
+	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 900, height = 500, units = "px", pointsize = 10)
+	plot(position, relativeIntensity, xlab = "Position", ylab ="Relative intensity")
+	lines(splains, col = "blue")
+	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
+	# abline(v=(seq(0,3500,100)), col="burlywood4", lty="dotted")
+	# abline(h=(seq(0,12,0.5)), col="burlywood2", lty="dotted")
+	dev.off()
 }
+
+# plot(position, relativeIntensity, pch=20, xlim =c(0,3500)
 
 magicBox = function(){
 # this one calculates 3 lokālos maksimumus kur pirmais ir centra maksimums, un tad ir pārējie maksimumi
@@ -93,7 +82,7 @@ for (i in 1:2){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
-	allineed = plot(i)
+	allineed = plotData(i)
 }
 
 
