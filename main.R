@@ -1,5 +1,4 @@
 library(pacman)
-# p_load(quantmod)
 p_load(pracma)
 
 getwd()
@@ -9,7 +8,7 @@ getwd()
 alldata = list.files(pattern="*.csv")
 
 csvInput = function(i){
-	#ielasa .csv failu
+	# ielasa .csv failu
 	# alldata[i] vietā ielikt i-to lista alldata elementu
 	colNames = c('dateTime', 'Time', 'lightIntensity', 'relativeIntensity', 'angle',
 		'angularVelocity', 'angularAcceleration', 'position', 'velocity', 'acceleration')
@@ -33,6 +32,7 @@ filenameInterpret = function(filename){
 	colors = c('g', 'r')
 	distances = c('340','440','580')
 	measurementCounter=c(sprintf("_%.f", seq(1,4,1)))
+
 	#call patternSearch function
 	color = patternSearch(filename, colors)
 	ai = patternSearch(filename, a)
@@ -52,6 +52,7 @@ processData = function(){
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
 	# cut vectors smaller to avoid noise
+	# possible improvement: find the first and last peak of min height 0.01 and cut 5 indexes before that
 	begin = 10
 	end = length(position)/2
 	position = position[begin:end]
@@ -74,25 +75,16 @@ plotData = function(i, data, peaks, peakPositions){
 	points(peakPositions, peaks, col = 'orangered', pch=19)
 	lines(splains, col = "purple", lwd = 2)
 	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
-	# abline(v=(seq(0,0.020,0.002)), col="burlywood2", lty="dotted")
-	# abline(h=(seq(0,3,0.2)), col="burlywood4", lty="dotted")
+	abline(v=(seq(0,0.020,0.002)), col="burlywood2", lty="dotted")
+	abline(h=(seq(0,3,0.2)), col="burlywood4", lty="dotted")
 	dev.off()
 }
-
-# plot(position, relativeIntensity, pch=20, xlim =c(0,3500)
 
 magicBox = function(relativeIntensity, peakCount){
 	# peaks = findpeaks(relativeIntensity, nups = 10, ndowns = nups,
 	# 	minpeakheight = 0.1, minpeakdistance = 10, npeaks = peakCount)
 	relativeIntensity = as.numeric(unlist(data[2]))
 	peaks = findpeaks(relativeIntensity, minpeakdistance = 5, threshold = 0.51, npeaks = peakCount)
-	# print(peaks2[,3])
-	# print(peaks2[,4])
-	# print(nrow(peaks2))
-	# print(peaks2)
-	# # print(peaks2[[3]][1,])
-	# print(peaks2[,2][1])
-	# peaks[[1]][1]
 	return(peaks)
 }
 
@@ -101,52 +93,40 @@ plotPeaks = function(peaks, position){
  	# the second the position/index where the maximum is reached,
  	# the third and forth the indices of where the peak begins and ends
  	# --- in the sense of where the pattern starts and ends.
- 	peakPositionIndexs = vector(mode="numeric", length=0)
+ 	peakPositionIndex = vector(mode="numeric", length=0)
  	peakPositions = vector(mode="numeric", length=0)
+ 		# this finds the peak by finding the middle point of where the peak begins and ends
 		for (i in 1:nrow(peaks)){
-			# peaks2[,2][i]
 			peakPositionIndex_i = (peaks[,3][i] + peaks[,4][i]) / 2
-			peakPositionIndexs = c(peakPositionIndexs, peakPositionIndex_i)
+			peakPositionIndex = c(peakPositionIndex, peakPositionIndex_i)
 		}
-		for (i in 1:length(peakPositionIndexs)){
-			index = peakPositionIndexs[i]
+		# this conects the index of the position of the peak with the value of the position
+		for (i in 1:length(peakPositionIndex)){
+			index = peakPositionIndex[i]
 			peakPosition = position[index]
 			peakPositions = c(peakPositions, peakPosition)
 		}
 	return(peakPositions)
 }
 
-# i in 1:length(data)
+
 for (i in 1:2){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
 	data = processData()
-	# plotData(i, data)
-	# print(relativeIntensity)
 	peakData = magicBox(data, 5)
 	peaks = peakData[,1]
 	position = as.numeric(unlist(data[1]))
 	peakPositions = plotPeaks(peakData, position)
 	print(peaks)
 	print(peakPositions)
-	print(head(data))
-	plotData(i, data, peaks, peakPositions)
+	# print(head(data))
+	# plotData(i, data, peaks, peakPositions)
 }
 
- # The first column gives the height,
- # the second the position/index where the maximum is reached,
- # the third and forth the indices of where the peak begins and ends
- # --- in the sense of where the pattern starts and ends. 
 # high threshold - viens pīķis
 # low threshold - divi pīķi
-
-# filename = csvInput(1)
-# interpretation = filenameInterpret(filename)
-
-# print(head(filename))
-# print(head(alldata[1]))
-# print(interpretation)
 
 # list = filenameInterpret(filename)
 # names(list) <- c("color", "ai", "bi", "turn")
