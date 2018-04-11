@@ -57,12 +57,9 @@ processData = function(){
 	position = position[begin:end]
 	relativeIntensity = relativeIntensity[begin:end]
 	data = data.frame(position, relativeIntensity)
-	# print(typeof(data))
-	# print(typeof(position))
-	# return(c(position, relativeIntensity))
 }
 
-plotData = function(i, data){
+plotData = function(i, data, peaks, peakPositions){
 	# splains = smooth.spline(position, relativeIntensity)
 	# splains = spline(position, relativeIntensity)
 	# splains = spline(position, relativeIntensity, method = "natural")
@@ -70,15 +67,17 @@ plotData = function(i, data){
 	relativeIntensity = as.numeric(unlist(data[2]))
 	print(typeof(position))
 	splains = smooth.spline(position, relativeIntensity, spar = 0.001, all.knots=TRUE)
+	# print(length(peaks))
+	# print(length(peakPositions))
 	plot.new()
-	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 10)
-	plot(position, relativeIntensity, xlab = "Position", ylab ="Relative intensity")
+	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
+	plot(position, relativeIntensity, col = 'red', pch=16, xlab = "Position", ylab ="Relative intensity")
+	# points(peakPositions, peaks, col = 'red', pch=16) 
 	lines(splains, col = "blue")
 	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
 	abline(v=(seq(0,0.020,0.002)), col="burlywood2", lty="dotted")
 	abline(h=(seq(0,3,0.2)), col="burlywood4", lty="dotted")
 	dev.off()
-	# return(relativeIntensity)
 }
 
 # plot(position, relativeIntensity, pch=20, xlim =c(0,3500)
@@ -88,13 +87,31 @@ magicBox = function(relativeIntensity, peakCount){
 	# un tad ir pārējie maksimumi
 	# peaks2 = findpeaks(relativeIntensity, nups = 10, ndowns = nups,
 	# 	minpeakheight = 0.1, minpeakdistance = 10, npeaks = peakCount)
-	peaks2 = findpeaks(relativeIntensity, minpeakdistance = 10, threshold = 1, npeaks = peakCount)
+	relativeIntensity = as.numeric(unlist(data[2]))
+	peaks2 = findpeaks(relativeIntensity, minpeakdistance = 5, threshold = 0.51, npeaks = peakCount)
+	# print(peaks2[,3])
+	# print(peaks2[,4])
+	# print(nrow(peaks2))
+	# print(peaks2)
+	# # print(peaks2[[3]][1,])
+	# print(peaks2[,2][1])
+	# peaks[[1]][1]
 	return(peaks2)
 }
 
-# _plotPeaks = function(){
-
-# }
+plotPeaks = function(peaks){
+	# The first column gives the height,
+ 	# the second the position/index where the maximum is reached,
+ 	# the third and forth the indices of where the peak begins and ends
+ 	# --- in the sense of where the pattern starts and ends.
+ 	peakPositions = vector(mode="numeric", length=0)
+		for (i in 1:nrow(peaks)){
+			# peaks2[,2][i]
+			peakPosition_i = (peaks[,3][i] + peaks[,4][i]) / 2
+			peakPositions = c(peakPositions, peakPosition_i)
+		}
+	return(peakPositions)
+}
 
 # i in 1:length(data)
 for (i in 1:2){
@@ -102,10 +119,14 @@ for (i in 1:2){
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
 	data = processData()
-	relativeIntensity = plotData(i, data)
+	# plotData(i, data)
 	# print(relativeIntensity)
-	# peaks = magicBox(relativeIntensity, 5)
-	# print(peaks)
+	peakData = magicBox(data, 5)
+	peaks = peakData[,1]
+	peakPositions = plotPeaks(peakData)
+	print(peaks)
+	print(peakPositions)
+	plotData(i, data, peaks, peakPositions)
 }
 
  # The first column gives the height,
