@@ -43,11 +43,7 @@ filenameInterpret = function(filename){
 }
 
 
-clearData = function(){
-
-}
-
-plotData = function(i){
+processData = function(){
 	position = (filename[, 'position'])
 	relativeIntensity = (filename[, 'relativeIntensity'])
 	dataRaw = data.frame(position, relativeIntensity)
@@ -60,11 +56,19 @@ plotData = function(i){
 	end = length(position)/2
 	position = position[begin:end]
 	relativeIntensity = relativeIntensity[begin:end]
-	# print(position[1:end])
-	#print(data[, 'position'])
+	data = data.frame(position, relativeIntensity)
+	# print(typeof(data))
+	# print(typeof(position))
+	# return(c(position, relativeIntensity))
+}
+
+plotData = function(i, data){
 	# splains = smooth.spline(position, relativeIntensity)
 	# splains = spline(position, relativeIntensity)
 	# splains = spline(position, relativeIntensity, method = "natural")
+	position = as.numeric(unlist(data[1]))
+	relativeIntensity = as.numeric(unlist(data[2]))
+	print(typeof(position))
 	splains = smooth.spline(position, relativeIntensity, spar = 0.001, all.knots=TRUE)
 	plot.new()
 	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 10)
@@ -74,7 +78,7 @@ plotData = function(i){
 	abline(v=(seq(0,0.020,0.002)), col="burlywood2", lty="dotted")
 	abline(h=(seq(0,3,0.2)), col="burlywood4", lty="dotted")
 	dev.off()
-	return(relativeIntensity)
+	# return(relativeIntensity)
 }
 
 # plot(position, relativeIntensity, pch=20, xlim =c(0,3500)
@@ -97,10 +101,11 @@ for (i in 1:2){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
-	relativeIntensity = plotData(i)
+	data = processData()
+	relativeIntensity = plotData(i, data)
 	# print(relativeIntensity)
-	peaks = magicBox(relativeIntensity, 5)
-	print(peaks)
+	# peaks = magicBox(relativeIntensity, 5)
+	# print(peaks)
 }
 
  # The first column gives the height,
