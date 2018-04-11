@@ -42,28 +42,33 @@ filenameInterpret = function(filename){
 	return(c(color, ai, bi, distance, turn))
 }
 
+
+clearData = function(){
+
+}
+
 plotData = function(i){
 	position = (filename[, 'position'])
 	relativeIntensity = (filename[, 'relativeIntensity'])
 	dataRaw = data.frame(position, relativeIntensity)
 	data = na.omit(dataRaw)
 
-	# cut vectors smaller to avoid noise
-	end = 10
-	kurzposition = data[[1]][1:end]
-	kurzintensity = data[[2]][1:end]
-	print(position[1:end])
-
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
+	# cut vectors smaller to avoid noise
+	begin = 10
+	end = length(position)/2
+	position = position[begin:end]
+	relativeIntensity = relativeIntensity[begin:end]
+	# print(position[1:end])
 	#print(data[, 'position'])
 	# splains = smooth.spline(position, relativeIntensity)
 	# splains = spline(position, relativeIntensity)
 	# splains = spline(position, relativeIntensity, method = "natural")
-	splains = smooth.spline(kurzposition, kurzintensity, spar = 0.001, all.knots=TRUE)
+	splains = smooth.spline(position, relativeIntensity, spar = 0.001, all.knots=TRUE)
 	plot.new()
 	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 10)
-	plot(kurzposition, kurzintensity, xlab = "Position", ylab ="Relative intensity")
+	plot(position, relativeIntensity, xlab = "Position", ylab ="Relative intensity")
 	lines(splains, col = "blue")
 	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
 	abline(v=(seq(0,0.020,0.002)), col="burlywood2", lty="dotted")
@@ -75,15 +80,17 @@ plotData = function(i){
 # plot(position, relativeIntensity, pch=20, xlim =c(0,3500)
 
 magicBox = function(relativeIntensity, peakCount){
-	# this one calculates 3 lokālos maksimumus kur pirmais ir centra maksimums, un tad ir pārējie maksimumi
-	# atrod the maksimumu
-	# apgriež tur pa vidu
-	# peaks1=findPeaks(position, peakCount)
+	# this one calculates 3 lokālos maksimumus kur pirmais ir centra maksimums,
+	# un tad ir pārējie maksimumi
 	# peaks2 = findpeaks(relativeIntensity, nups = 10, ndowns = nups,
 	# 	minpeakheight = 0.1, minpeakdistance = 10, npeaks = peakCount)
 	peaks2 = findpeaks(relativeIntensity, minpeakdistance = 10, threshold = 1, npeaks = peakCount)
 	return(peaks2)
 }
+
+# _plotPeaks = function(){
+
+# }
 
 # i in 1:length(data)
 for (i in 1:2){
