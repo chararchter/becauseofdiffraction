@@ -49,14 +49,24 @@ processData = function(){
 	dataRaw = data.frame(position, relativeIntensity)
 	data = na.omit(dataRaw)
 
-	position = data[, 'position']
-	relativeIntensity = data[, 'relativeIntensity']
+	# position = data[, 'position']
+	# relativeIntensity = data[, 'relativeIntensity']
+	# sort vectors
+	data = data[with(data, order(data[1])), ]
 	# cut vectors smaller to avoid noise
 	# possible improvement: find the first and last peak of min height 0.01 and cut 5 indexes before that
-	begin = 10
-	end = length(position)/2
-	position = position[begin:end]
-	relativeIntensity = relativeIntensity[begin:end]
+	position = data[, 'position']
+	relativeIntensity = data[, 'relativeIntensity']
+	skaits = 4
+	relativeIntensity  = aggregate(relativeIntensity, by=list(0:(length(relativeIntensity)-1) %/% skaits), mean)
+	position  = aggregate(position, by=list(0:(length(position)-1) %/% skaits), mean)
+
+
+	# begin = 10
+	# # end = length(position)/2
+	# end = (length(position) - 20)
+	# position = position[begin:end]
+	# relativeIntensity = relativeIntensity[begin:end]
 	data = data.frame(position, relativeIntensity)
 }
 
@@ -67,8 +77,8 @@ plotData = function(i, data, peaks, peakPositions){
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
 
-	splains = smooth.spline(position, relativeIntensity, spar = 0.001, all.knots=TRUE)
-
+	# splains = smooth.spline(position, relativeIntensity, spar = 0.001, all.knots=TRUE)
+	splains = smooth.spline(position, relativeIntensity, df = 6, spar = 0.001, all.knots = TRUE)
 	plot.new()
 	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
 	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
