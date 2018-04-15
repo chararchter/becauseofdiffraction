@@ -71,7 +71,7 @@ plotData = function(i, data, peaks, peakPositions){
 
 	plot.new()
 	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
-	plot(position, relativeIntensity, col="gray40", xlab = "Position", ylab ="Relative intensity")
+	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
 	points(peakPositions, peaks, col = 'orangered', pch=19)
 	lines(splains, col = "purple", lwd = 2)
 	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
@@ -84,7 +84,7 @@ magicBox = function(relativeIntensity, peakCount){
 	# peaks = findpeaks(relativeIntensity, nups = 10, ndowns = nups,
 	# 	minpeakheight = 0.1, minpeakdistance = 10, npeaks = peakCount)
 	relativeIntensity = as.numeric(unlist(data[2]))
-	peaks = findpeaks(relativeIntensity, minpeakdistance = 5, threshold = 0.51, npeaks = peakCount)
+	peaks = findpeaks(relativeIntensity, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
 	return(peaks)
 }
 
@@ -110,19 +110,19 @@ plotPeaks = function(peaks, position){
 }
 
 
-for (i in 1:2){
+for (i in 1:5){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
 	data = processData()
-	peakData = magicBox(data, 5)
+	peakData = magicBox(data, 10)
 	peaks = peakData[,1]
 	position = as.numeric(unlist(data[1]))
 	peakPositions = plotPeaks(peakData, position)
 	print(peaks)
 	print(peakPositions)
 	# print(head(data))
-	# plotData(i, data, peaks, peakPositions)
+	plotData(i, data, peaks, peakPositions)
 }
 
 # high threshold - viens pīķis
