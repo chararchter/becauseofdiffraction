@@ -51,21 +51,9 @@ processData = function(){
 
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
-	# sort vectors
-	# data = data[with(data, order(data[1])), ]
-	# cut vectors smaller to avoid noise
-	# possible improvement: find the first and last peak of min height 0.01 and cut 5 indexes before that
-	# hoe don't do that works horrible
-	# position = data[, 'position']
-	# relativeIntensity = data[, 'relativeIntensity']
-	# skaits = 4
-	# relativeIntensity  = aggregate(relativeIntensity, by=list(0:(length(relativeIntensity)-1) %/% skaits), mean)
-	# position  = aggregate(position, by=list(0:(length(position)-1) %/% skaits), mean)
-
 
 	begin = 10
-	# end = length(position)/2
-	end = (length(position) - 20)
+	end = length(position)/2
 	position = position[begin:end]
 	relativeIntensity = relativeIntensity[begin:end]
 	data = data.frame(position, relativeIntensity)
@@ -78,8 +66,12 @@ plotData = function(i, data, peaks, peakPositions){
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
 
-	splains = smooth.spline(position, relativeIntensity, spar = 0.001, all.knots=TRUE)
-	# splains = smooth.spline(position, relativeIntensity, df = 6, spar = 0.001, all.knots = TRUE)
+	# splains = smooth.spline(position, relativeIntensity, spar = 0.0001, all.knots=TRUE)
+	# splains = smooth.spline(position, relativeIntensity, df = 2, spar = 0.0001, all.knots = TRUE)
+	# splains = smooth.spline(position, relativeIntensity, df = 50, spar = 1e-7, all.knots = TRUE)
+	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
+	# print(splains)
+	print(typeof(splains))
 	plot.new()
 	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
 	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
@@ -93,14 +85,22 @@ plotData = function(i, data, peaks, peakPositions){
 	abline(v=(seq(beginX, (max(relativeIntensity)+10), incrementX)), col="burlywood4", lty="dotted")
 	abline(h=(seq(0, (max(position)+10), incrementY)), col="burlywood4", lty="dotted")
 	dev.off()
+	return(splains)
 }
 
 magicBox = function(relativeIntensity, peakCount){
 	# peaks = findpeaks(relativeIntensity, nups = 10, ndowns = nups,
 	# 	minpeakheight = 0.1, minpeakdistance = 10, npeaks = peakCount)
 	relativeIntensity = as.numeric(unlist(data[2]))
-	peaks = findpeaks(relativeIntensity, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
+	# peaks = findpeaks(relativeIntensity, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
+	# splains = as.numeric(unlist(splains))
+	# peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
 	return(peaks)
+}
+
+splineMagicBox = function(splains, peakCount){
+	splains = as.numeric(unlist(splains))
+	peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
 }
 
 plotPeaks = function(peaks, position){
@@ -125,12 +125,13 @@ plotPeaks = function(peaks, position){
 }
 
 
-for (i in 1:5){
+for (i in 2:5){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
 	data = processData()
 	peakData = magicBox(data, 10)
+	peakDataSplain = splineMagicBox(splains, 10)
 	peaks = peakData[,1]
 	position = as.numeric(unlist(data[1]))
 	peakPositions = plotPeaks(peakData, position)
