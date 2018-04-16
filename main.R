@@ -49,24 +49,25 @@ processData = function(){
 	dataRaw = data.frame(position, relativeIntensity)
 	data = na.omit(dataRaw)
 
-	# position = data[, 'position']
-	# relativeIntensity = data[, 'relativeIntensity']
-	# sort vectors
-	data = data[with(data, order(data[1])), ]
-	# cut vectors smaller to avoid noise
-	# possible improvement: find the first and last peak of min height 0.01 and cut 5 indexes before that
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
-	skaits = 4
-	relativeIntensity  = aggregate(relativeIntensity, by=list(0:(length(relativeIntensity)-1) %/% skaits), mean)
-	position  = aggregate(position, by=list(0:(length(position)-1) %/% skaits), mean)
+	# sort vectors
+	# data = data[with(data, order(data[1])), ]
+	# cut vectors smaller to avoid noise
+	# possible improvement: find the first and last peak of min height 0.01 and cut 5 indexes before that
+	# hoe don't do that works horrible
+	# position = data[, 'position']
+	# relativeIntensity = data[, 'relativeIntensity']
+	# skaits = 4
+	# relativeIntensity  = aggregate(relativeIntensity, by=list(0:(length(relativeIntensity)-1) %/% skaits), mean)
+	# position  = aggregate(position, by=list(0:(length(position)-1) %/% skaits), mean)
 
 
-	# begin = 10
-	# # end = length(position)/2
-	# end = (length(position) - 20)
-	# position = position[begin:end]
-	# relativeIntensity = relativeIntensity[begin:end]
+	begin = 10
+	# end = length(position)/2
+	end = (length(position) - 20)
+	position = position[begin:end]
+	relativeIntensity = relativeIntensity[begin:end]
 	data = data.frame(position, relativeIntensity)
 }
 
@@ -77,16 +78,20 @@ plotData = function(i, data, peaks, peakPositions){
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
 
-	# splains = smooth.spline(position, relativeIntensity, spar = 0.001, all.knots=TRUE)
-	splains = smooth.spline(position, relativeIntensity, df = 6, spar = 0.001, all.knots = TRUE)
+	splains = smooth.spline(position, relativeIntensity, spar = 0.001, all.knots=TRUE)
+	# splains = smooth.spline(position, relativeIntensity, df = 6, spar = 0.001, all.knots = TRUE)
 	plot.new()
 	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
 	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
 	points(peakPositions, peaks, col = 'orangered', pch=19)
 	lines(splains, col = "purple", lwd = 2)
 	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
-	abline(v=(seq(0,0.020,0.002)), col="burlywood2", lty="dotted")
-	abline(h=(seq(0,3,0.2)), col="burlywood4", lty="dotted")
+
+	incrementY = round(max(relativeIntensity) / 10, digits = 2)
+	incrementX = round((max(position)-min(position)) / 10, digits = 3)
+	beginX = round(min(position), digits = 2)
+	abline(v=(seq(beginX, (max(relativeIntensity)+10), incrementX)), col="burlywood4", lty="dotted")
+	abline(h=(seq(0, (max(position)+10), incrementY)), col="burlywood4", lty="dotted")
 	dev.off()
 }
 
@@ -129,8 +134,8 @@ for (i in 1:5){
 	peaks = peakData[,1]
 	position = as.numeric(unlist(data[1]))
 	peakPositions = plotPeaks(peakData, position)
-	print(peaks)
-	print(peakPositions)
+	# print(peaks)
+	# print(peakPositions)
 	# print(head(data))
 	plotData(i, data, peaks, peakPositions)
 }
