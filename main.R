@@ -59,19 +59,26 @@ processData = function(){
 	data = data.frame(position, relativeIntensity)
 }
 
-plotData = function(i, data, peaks, peakPositions){
+approxData = function(data){
+	position = as.numeric(unlist(data[1]))
+	relativeIntensity = as.numeric(unlist(data[2]))
 	# splains = smooth.spline(position, relativeIntensity)
 	# splains = spline(position, relativeIntensity)
 	# splains = spline(position, relativeIntensity, method = "natural")
-	position = as.numeric(unlist(data[1]))
-	relativeIntensity = as.numeric(unlist(data[2]))
-
 	# splains = smooth.spline(position, relativeIntensity, spar = 0.0001, all.knots=TRUE)
 	# splains = smooth.spline(position, relativeIntensity, df = 2, spar = 0.0001, all.knots = TRUE)
 	# splains = smooth.spline(position, relativeIntensity, df = 50, spar = 1e-7, all.knots = TRUE)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
+	peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
+}
+
+
+plotData = function(i, data, peaks, peakPositions){
+	position = as.numeric(unlist(data[1]))
+	relativeIntensity = as.numeric(unlist(data[2]))
+	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
 	# print(splains)
-	print(typeof(splains))
+	# print(typeof(splains))
 	plot.new()
 	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
 	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
@@ -92,16 +99,16 @@ magicBox = function(relativeIntensity, peakCount){
 	# peaks = findpeaks(relativeIntensity, nups = 10, ndowns = nups,
 	# 	minpeakheight = 0.1, minpeakdistance = 10, npeaks = peakCount)
 	relativeIntensity = as.numeric(unlist(data[2]))
-	# peaks = findpeaks(relativeIntensity, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
+	peaks = findpeaks(relativeIntensity, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
 	# splains = as.numeric(unlist(splains))
 	# peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
 	return(peaks)
 }
 
-splineMagicBox = function(splains, peakCount){
-	splains = as.numeric(unlist(splains))
-	peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
-}
+# splineMagicBox = function(splains, peakCount){
+# 	splains = as.numeric(unlist(splains))
+# 	peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
+# }
 
 plotPeaks = function(peaks, position){
 	# The first column gives the height,
@@ -131,7 +138,7 @@ for (i in 2:5){
 	interpretation = filenameInterpret(alldata[i])
 	data = processData()
 	peakData = magicBox(data, 10)
-	peakDataSplain = splineMagicBox(splains, 10)
+	# peakDataSplain = splineMagicBox(splains, 10)
 	peaks = peakData[,1]
 	position = as.numeric(unlist(data[1]))
 	peakPositions = plotPeaks(peakData, position)
