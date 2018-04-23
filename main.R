@@ -42,11 +42,11 @@ filenameInterpret = function(filename){
 	return(c(color, ai, bi, distance, turn))
 }
 
-
 processData = function(){
 	position = (filename[, 'position'])
 	relativeIntensity = (filename[, 'relativeIntensity'])
 	dataRaw = data.frame(position, relativeIntensity)
+	# get rid of rows with NA
 	data = na.omit(dataRaw)
 
 	position = data[, 'position']
@@ -56,10 +56,32 @@ processData = function(){
 	end = length(position)/2
 	position = position[begin:end]
 	relativeIntensity = relativeIntensity[begin:end]
+	# data = data.frame(position, relativeIntensity)
+	print('shit is bout to get real')
+	print(max(relativeIntensity))
+
+	if (max(relativeIntensity) > 2){
+		xlimit = max(relativeIntensity)/2	
+	}
+	else{
+		xlimit = max(relativeIntensity)/8
+	}
+	# xlimit = max(relativeIntensity)/8		
+	for (i in 1:(length(position)/2)){
+		if (relativeIntensity[i] > xlimit){
+			terminate = i
+			print(terminate)
+			print(relativeIntensity[i])
+			break
+		}
+	}
+	position = position[terminate:length(position)]
+	relativeIntensity = relativeIntensity[terminate:length(relativeIntensity)]
 	data = data.frame(position, relativeIntensity)
 }
 
 approxData = function(data){
+	# currently disabled. wanted to migrate spline from plot to get to work with it
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
 	# splains = smooth.spline(position, relativeIntensity)
@@ -69,7 +91,9 @@ approxData = function(data){
 	# splains = smooth.spline(position, relativeIntensity, df = 2, spar = 0.0001, all.knots = TRUE)
 	# splains = smooth.spline(position, relativeIntensity, df = 50, spar = 1e-7, all.knots = TRUE)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
-	peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
+	# print(splains)
+	# peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
+	# print(peaks)
 }
 
 
@@ -95,7 +119,7 @@ plotData = function(i, data, peaks, peakPositions){
 	return(splains)
 }
 
-magicBox = function(relativeIntensity, peakCount){
+findPeaks = function(relativeIntensity, peakCount){
 	# peaks = findpeaks(relativeIntensity, nups = 10, ndowns = nups,
 	# 	minpeakheight = 0.1, minpeakdistance = 10, npeaks = peakCount)
 	relativeIntensity = as.numeric(unlist(data[2]))
@@ -132,27 +156,19 @@ plotPeaks = function(peaks, position){
 }
 
 
-for (i in 2:5){
+for (i in 4:5){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
 	data = processData()
-	peakData = magicBox(data, 10)
+	# peaks2 = approxData(data)
+	peakData = findPeaks(data, 10)
 	# peakDataSplain = splineMagicBox(splains, 10)
 	peaks = peakData[,1]
 	position = as.numeric(unlist(data[1]))
 	peakPositions = plotPeaks(peakData, position)
 	# print(peaks)
 	# print(peakPositions)
-	# print(head(data))
+	print(head(data))
 	plotData(i, data, peaks, peakPositions)
 }
-
-# high threshold - viens pīķis
-# low threshold - divi pīķi
-
-# list = filenameInterpret(filename)
-# names(list) <- c("color", "ai", "bi", "turn")
-
-# print(list)
-# names(list)
