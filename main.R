@@ -56,12 +56,19 @@ processData = function(){
 	end = length(position)/2
 	position = position[begin:end]
 	relativeIntensity = relativeIntensity[begin:end]
+	data = data.frame(position, relativeIntensity)
+
+	data = data[with(data, order(position)), ]
+
+	position = data[, 'position']
+	relativeIntensity = data[, 'relativeIntensity']
+
 	# data = data.frame(position, relativeIntensity)
 	print('shit is bout to get real')
 	print(max(relativeIntensity))
 
 	if (max(relativeIntensity) > 2){
-		xlimit = max(relativeIntensity)/2	
+		xlimit = (max(relativeIntensity)/5) - (max(relativeIntensity)/10)
 	}
 	else{
 		xlimit = max(relativeIntensity)/8
@@ -99,6 +106,7 @@ approxData = function(data){
 
 plotData = function(i, data, peaks, peakPositions){
 	position = as.numeric(unlist(data[1]))
+	# print(position)
 	relativeIntensity = as.numeric(unlist(data[2]))
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
 	# print(splains)
@@ -134,7 +142,7 @@ findPeaks = function(relativeIntensity, peakCount){
 # 	peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
 # }
 
-plotPeaks = function(peaks, position){
+peakPositionsToPlot = function(peaks, position){
 	# The first column gives the height,
  	# the second the position/index where the maximum is reached,
  	# the third and forth the indices of where the peak begins and ends
@@ -166,9 +174,9 @@ for (i in 4:5){
 	# peakDataSplain = splineMagicBox(splains, 10)
 	peaks = peakData[,1]
 	position = as.numeric(unlist(data[1]))
-	peakPositions = plotPeaks(peakData, position)
+	peakPositions = peakPositionsToPlot(peakData, position)
 	# print(peaks)
 	# print(peakPositions)
-	print(head(data))
+	print(data)
 	plotData(i, data, peaks, peakPositions)
 }
