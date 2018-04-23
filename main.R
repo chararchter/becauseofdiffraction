@@ -59,7 +59,6 @@ processData = function(){
 	data = data.frame(position, relativeIntensity)
 
 	data = data[with(data, order(position)), ]
-
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
 
@@ -76,15 +75,32 @@ processData = function(){
 	# xlimit = max(relativeIntensity)/8		
 	for (i in 1:(length(position)/2)){
 		if (relativeIntensity[i] > xlimit){
-			terminate = i
-			print(terminate)
+			terminateBegin = i
+			print(terminateBegin)
 			print(relativeIntensity[i])
 			break
 		}
 	}
-	position = position[terminate:length(position)]
-	relativeIntensity = relativeIntensity[terminate:length(relativeIntensity)]
+
+	data = data[with(data, order(-position)), ]
+	position = data[, 'position']
+	relativeIntensity = data[, 'relativeIntensity']
+	for (i in 1:(length(position)/2)){
+		if (relativeIntensity[i] > xlimit){
+			terminateEnd = length(position) - i
+			print(terminateEnd)
+			print(relativeIntensity[i])
+			break
+		}
+	}
+
+	# data = data[with(data, order(position)), ]	
+	# position = position[terminateBegin:length(position)]
+	# relativeIntensity = relativeIntensity[terminateBegin:length(relativeIntensity)]
+	position = position[terminateBegin:terminateEnd]
+	relativeIntensity = relativeIntensity[terminateBegin:terminateEnd]
 	data = data.frame(position, relativeIntensity)
+	data = data[with(data, order(position)), ]	
 }
 
 approxData = function(data){
@@ -164,7 +180,7 @@ peakPositionsToPlot = function(peaks, position){
 }
 
 
-for (i in 4:5){
+for (i in 1:5){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
