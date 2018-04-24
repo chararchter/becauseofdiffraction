@@ -46,9 +46,9 @@ processData = function(){
 	position = (filename[, 'position'])
 	relativeIntensity = (filename[, 'relativeIntensity'])
 	dataRaw = data.frame(position, relativeIntensity)
+
 	# get rid of rows with NA
 	data = na.omit(dataRaw)
-
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
 
@@ -64,24 +64,26 @@ processData = function(){
 	relativeIntensity = relativeIntensity[begin:end]
 	position = position[begin:end]
 	data = data.frame(position, relativeIntensity)
-	print(data)
+	# print(data)
 
 	# sort according to position
-	# data = data[with(data, order(position)), ]
-	# position = data[, 'position']
-	# relativeIntensity = data[, 'relativeIntensity']
-
+	data = data[with(data, order(position)), ]
+	position = data[, 'position']
+	relativeIntensity = data[, 'relativeIntensity']
+	# print(data)
 	print('shit is bout to get real')
 	print(max(relativeIntensity))
 
 	if (max(relativeIntensity) > 2){
-		xlimit = (max(relativeIntensity)/5) - (max(relativeIntensity)/10)
+		# xlimit = (max(relativeIntensity)/2) - (max(relativeIntensity)/10)
+		xlimit = (max(relativeIntensity)/2)
 	}
 	else{
-		xlimit = max(relativeIntensity)/7
+		# xlimit = (max(relativeIntensity)/7 - (max(relativeIntensity)/10))
+		xlimit = (max(relativeIntensity)/2)
 	}
 	# xlimit = max(relativeIntensity)/8		
-	for (i in 1:(length(position)/2)){
+	for (i in 1:length(position)){
 		if (relativeIntensity[i] > xlimit){
 			terminateBegin = i
 			print(terminateBegin)
@@ -92,6 +94,7 @@ processData = function(){
 
 	position = position[terminateBegin:length(position)]
 	relativeIntensity = relativeIntensity[terminateBegin:length(relativeIntensity)]
+	data = data.frame(position, relativeIntensity)
 
 	# data = data[with(data, order(-position)), ]
 	# position = data[, 'position']
@@ -132,17 +135,17 @@ approxData = function(data){
 }
 
 
-plotData = function(i, data, peaks, peakPositions){
+plotData = function(i, data){
 	position = as.numeric(unlist(data[1]))
-	# print(position)
 	relativeIntensity = as.numeric(unlist(data[2]))
+	# print(position)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
 	# print(splains)
 	# print(typeof(splains))
 	plot.new()
-	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
+	jpeg(paste('choprplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
 	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
-	points(peakPositions, peaks, col = 'orangered', pch=19)
+	# points(peakPositions, peaks, col = 'orangered', pch=19)
 	lines(splains, col = "purple", lwd = 2)
 	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
 
@@ -192,19 +195,18 @@ peakPositionsToPlot = function(peaks, position){
 }
 
 
-for (i in 4:5){
+for (i in 1:5){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
 	data = processData()
 	# peaks2 = approxData(data)
-	peakData = findPeaks(data, 10)
+	# peakData = findPeaks(data, 10)
 	# peakDataSplain = splineMagicBox(splains, 10)
-	peaks = peakData[,1]
-	position = as.numeric(unlist(data[1]))
-	peakPositions = peakPositionsToPlot(peakData, position)
+	# peaks = peakData[,1]
+	# position = as.numeric(unlist(data[1]))
+	# peakPositions = peakPositionsToPlot(peakData, position)
 	# print(peaks)
 	# print(peakPositions)
-	print(data)
-	plotData(i, data, peaks, peakPositions)
+	plotData(i, data)
 }
