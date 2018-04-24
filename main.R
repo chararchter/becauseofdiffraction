@@ -1,5 +1,6 @@
 library(pacman)
 p_load(pracma)
+p_load(stats)
 
 getwd()
 setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/4data")
@@ -76,13 +77,12 @@ processData = function(){
 
 	if (max(relativeIntensity) > 2){
 		# xlimit = (max(relativeIntensity)/2) - (max(relativeIntensity)/10)
-		xlimit = (max(relativeIntensity)/2)
+		xlimit = (max(relativeIntensity)/6)-(max(relativeIntensity)/10)
 	}
 	else{
 		# xlimit = (max(relativeIntensity)/7 - (max(relativeIntensity)/10))
-		xlimit = (max(relativeIntensity)/2)
+		xlimit = (max(relativeIntensity)/5)
 	}
-	# xlimit = max(relativeIntensity)/8		
 	for (i in 1:length(position)){
 		if (relativeIntensity[i] > xlimit){
 			terminateBegin = i
@@ -94,28 +94,19 @@ processData = function(){
 
 	position = position[terminateBegin:length(position)]
 	relativeIntensity = relativeIntensity[terminateBegin:length(relativeIntensity)]
+
+	for (i in length(position):1){
+		if (relativeIntensity[i] > xlimit){
+			terminateEnd = i
+			print(terminateEnd)
+			print(relativeIntensity[i])
+			break
+		}
+	}
+
+	position = position[1:terminateEnd]
+	relativeIntensity = relativeIntensity[1:terminateEnd]
 	data = data.frame(position, relativeIntensity)
-
-	# data = data[with(data, order(-position)), ]
-	# position = data[, 'position']
-	# relativeIntensity = data[, 'relativeIntensity']
-	# for (i in 1:(length(position)/2)){
-	# 	if (relativeIntensity[i] > xlimit){
-	# 		terminateEnd = length(position) - i
-	# 		print(terminateEnd)
-	# 		print(relativeIntensity[i])
-	# 		break
-	# 	}
-	# }
-
-	# data = data[with(data, order(position)), ]	
-	# position = position[terminateBegin:length(position)]
-	# relativeIntensity = relativeIntensity[terminateBegin:length(relativeIntensity)]
-
-	# position = position[terminateBegin:terminateEnd]
-	# relativeIntensity = relativeIntensity[terminateBegin:terminateEnd]
-	# data = data.frame(position, relativeIntensity)
-	# data = data[with(data, order(position)), ]	
 }
 
 approxData = function(data){
@@ -141,7 +132,7 @@ plotData = function(i, data){
 	# print(position)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
 	# print(splains)
-	# print(typeof(splains))
+	print(typeof(splains))
 	plot.new()
 	jpeg(paste('choprplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
 	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
@@ -195,7 +186,7 @@ peakPositionsToPlot = function(peaks, position){
 }
 
 
-for (i in 1:5){
+for (i in 4:5){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
