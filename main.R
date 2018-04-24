@@ -53,16 +53,24 @@ processData = function(){
 	relativeIntensity = data[, 'relativeIntensity']
 
 	begin = 10
-	end = length(position)/2
-	position = position[begin:end]
+	for (i in 1:length(position)){
+		if (position[i] == max(position)){
+			end = i
+			print(end)
+			break
+		}			
+	}
+
 	relativeIntensity = relativeIntensity[begin:end]
+	position = position[begin:end]
 	data = data.frame(position, relativeIntensity)
+	print(data)
 
-	data = data[with(data, order(position)), ]
-	position = data[, 'position']
-	relativeIntensity = data[, 'relativeIntensity']
+	# sort according to position
+	# data = data[with(data, order(position)), ]
+	# position = data[, 'position']
+	# relativeIntensity = data[, 'relativeIntensity']
 
-	# data = data.frame(position, relativeIntensity)
 	print('shit is bout to get real')
 	print(max(relativeIntensity))
 
@@ -70,7 +78,7 @@ processData = function(){
 		xlimit = (max(relativeIntensity)/5) - (max(relativeIntensity)/10)
 	}
 	else{
-		xlimit = max(relativeIntensity)/8
+		xlimit = max(relativeIntensity)/7
 	}
 	# xlimit = max(relativeIntensity)/8		
 	for (i in 1:(length(position)/2)){
@@ -82,25 +90,29 @@ processData = function(){
 		}
 	}
 
-	data = data[with(data, order(-position)), ]
-	position = data[, 'position']
-	relativeIntensity = data[, 'relativeIntensity']
-	for (i in 1:(length(position)/2)){
-		if (relativeIntensity[i] > xlimit){
-			terminateEnd = length(position) - i
-			print(terminateEnd)
-			print(relativeIntensity[i])
-			break
-		}
-	}
+	position = position[terminateBegin:length(position)]
+	relativeIntensity = relativeIntensity[terminateBegin:length(relativeIntensity)]
+
+	# data = data[with(data, order(-position)), ]
+	# position = data[, 'position']
+	# relativeIntensity = data[, 'relativeIntensity']
+	# for (i in 1:(length(position)/2)){
+	# 	if (relativeIntensity[i] > xlimit){
+	# 		terminateEnd = length(position) - i
+	# 		print(terminateEnd)
+	# 		print(relativeIntensity[i])
+	# 		break
+	# 	}
+	# }
 
 	# data = data[with(data, order(position)), ]	
 	# position = position[terminateBegin:length(position)]
 	# relativeIntensity = relativeIntensity[terminateBegin:length(relativeIntensity)]
-	position = position[terminateBegin:terminateEnd]
-	relativeIntensity = relativeIntensity[terminateBegin:terminateEnd]
-	data = data.frame(position, relativeIntensity)
-	data = data[with(data, order(position)), ]	
+
+	# position = position[terminateBegin:terminateEnd]
+	# relativeIntensity = relativeIntensity[terminateBegin:terminateEnd]
+	# data = data.frame(position, relativeIntensity)
+	# data = data[with(data, order(position)), ]	
 }
 
 approxData = function(data){
@@ -180,7 +192,7 @@ peakPositionsToPlot = function(peaks, position){
 }
 
 
-for (i in 1:5){
+for (i in 4:5){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
