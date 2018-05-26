@@ -131,7 +131,7 @@ plotData = function(i, data){
 	relativeIntensity = as.numeric(unlist(data[2]))
 	# print(position)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
-	# print(splains)
+	print(splains)
 	print(typeof(splains))
 	plot.new()
 	jpeg(paste('choprplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
