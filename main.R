@@ -34,7 +34,6 @@ filenameInterpret = function(filename){
 	distances = c('340','440','580')
 	measurementCounter=c(sprintf("_%.f", seq(1,4,1)))
 
-	#call patternSearch function
 	color = patternSearch(filename, colors)
 	ai = patternSearch(filename, a)
 	bi = patternSearch(filename, b)
@@ -47,7 +46,6 @@ processData = function(){
 	position = (filename[, 'position'])
 	relativeIntensity = (filename[, 'relativeIntensity'])
 	dataRaw = data.frame(position, relativeIntensity)
-
 	# get rid of rows with NA
 	data = na.omit(dataRaw)
 	position = data[, 'position']
@@ -120,7 +118,7 @@ approxData = function(data){
 	# splains = smooth.spline(position, relativeIntensity, df = 2, spar = 0.0001, all.knots = TRUE)
 	# splains = smooth.spline(position, relativeIntensity, df = 50, spar = 1e-7, all.knots = TRUE)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
-	# print(splains)
+	print(splains)
 	# peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
 	# print(peaks)
 }
@@ -131,8 +129,12 @@ plotData = function(i, data){
 	relativeIntensity = as.numeric(unlist(data[2]))
 	# print(position)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
-	print(splains)
-	print(typeof(splains))
+	fit1 = nls(relativeIntensity~(A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F),
+		data=data, start=list("A"=0.0001, "B"=0.001, "C"=0.01,"D"=2, "E"=2, "F"=10))
+	# a1=coef(fit1)[1]
+	print(fit1)
+	# print(splains)
+	# print(typeof(splains))
 	plot.new()
 	jpeg(paste('choprplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
 	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
