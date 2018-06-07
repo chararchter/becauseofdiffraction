@@ -1,14 +1,18 @@
-library(pacman)
-p_load(pracma)
-p_load(stats)
+# library(pacman)
+# p_load(pracma)
+# p_load(stats)
+# search()
+# library(pracma)
 
 getwd()
 setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/4data")
 getwd()
 
 alldata = list.files(pattern="*.csv")
+# print(length(alldata))
 
 csvInput = function(i){
+	setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/4data")
 	# ielasa .csv failu
 	# alldata[i] vietā ielikt i-to lista alldata elementu
 	colNames = c('dateTime', 'Time', 'lightIntensity', 'relativeIntensity', 'angle',
@@ -70,8 +74,8 @@ processData = function(){
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
 	# print(data)
-	print('shit is bout to get real')
-	print(max(relativeIntensity))
+	# print('shit is bout to get real')
+	# print(max(relativeIntensity))
 
 	if (max(relativeIntensity) > 2){
 		# xlimit = (max(relativeIntensity)/2) - (max(relativeIntensity)/10)
@@ -118,21 +122,22 @@ approxData = function(data){
 	# splains = smooth.spline(position, relativeIntensity, df = 2, spar = 0.0001, all.knots = TRUE)
 	# splains = smooth.spline(position, relativeIntensity, df = 50, spar = 1e-7, all.knots = TRUE)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
-	print(splains)
+	# print(splains)
 	# peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
 	# print(peaks)
 }
 
 
 plotData = function(i, data){
+	setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/plotoutput")
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
 	# print(position)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
-	fit1 = nls(relativeIntensity~(A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F),
-		data=data, start=list("A"=0.0001, "B"=0.001, "C"=0.01,"D"=2, "E"=2, "F"=10))
+	# fit1 = nls(relativeIntensity~(A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F),
+		# data=data, start=list("A"=0.0001, "B"=0.001, "C"=0.01,"D"=2, "E"=2, "F"=10))
 	# a1=coef(fit1)[1]
-	print(fit1)
+	# print(fit1)
 	# print(splains)
 	# print(typeof(splains))
 	plot.new()
@@ -188,11 +193,15 @@ peakPositionsToPlot = function(peaks, position){
 }
 
 
-for (i in 4:5){
+for (i in 1:length(alldata)){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
+	name = sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])
+	print(name)
 	data = processData()
+	setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/clearcsv")
+	write.csv(x=data, file=paste(sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])))
 	# peaks2 = approxData(data)
 	# peakData = findPeaks(data, 10)
 	# peakDataSplain = splineMagicBox(splains, 10)
@@ -201,5 +210,5 @@ for (i in 4:5){
 	# peakPositions = peakPositionsToPlot(peakData, position)
 	# print(peaks)
 	# print(peakPositions)
-	plotData(i, data)
+	# plotData(i, data)
 }
