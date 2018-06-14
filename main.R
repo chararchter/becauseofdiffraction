@@ -1,9 +1,3 @@
-# library(pacman)
-# p_load(pracma)
-# p_load(stats)
-# search()
-# library(pracma)
-
 getwd()
 setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/4data")
 getwd()
@@ -54,29 +48,25 @@ processData = function(){
 	data = na.omit(dataRaw)
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
-
+	# get index of the maximum position
 	begin = 10
 	for (i in 1:length(position)){
 		if (position[i] == max(position)){
 			end = i
-			print(end)
+			# print(end)
 			break
 		}			
 	}
-
+	# chop the vector when max position is reached
+	# physical interpretation - sensor goes backwards
 	relativeIntensity = relativeIntensity[begin:end]
 	position = position[begin:end]
 	data = data.frame(position, relativeIntensity)
-	# print(data)
-
 	# sort according to position
 	data = data[with(data, order(position)), ]
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
-	# print(data)
-	# print('shit is bout to get real')
-	# print(max(relativeIntensity))
-
+	# filter out noise - small relative intensities at the begining and end
 	if (max(relativeIntensity) > 2){
 		# xlimit = (max(relativeIntensity)/2) - (max(relativeIntensity)/10)
 		xlimit = (max(relativeIntensity)/6)-(max(relativeIntensity)/10)
@@ -88,24 +78,22 @@ processData = function(){
 	for (i in 1:length(position)){
 		if (relativeIntensity[i] > xlimit){
 			terminateBegin = i
-			print(terminateBegin)
-			print(relativeIntensity[i])
+			# print(terminateBegin)
+			# print(relativeIntensity[i])
 			break
 		}
 	}
-
 	position = position[terminateBegin:length(position)]
 	relativeIntensity = relativeIntensity[terminateBegin:length(relativeIntensity)]
 
 	for (i in length(position):1){
 		if (relativeIntensity[i] > xlimit){
 			terminateEnd = i
-			print(terminateEnd)
-			print(relativeIntensity[i])
+			# print(terminateEnd)
+			# print(relativeIntensity[i])
 			break
 		}
 	}
-
 	position = position[1:terminateEnd]
 	relativeIntensity = relativeIntensity[1:terminateEnd]
 	data = data.frame(position, relativeIntensity)
@@ -115,14 +103,7 @@ approxData = function(data){
 	# currently disabled. wanted to migrate spline from plot to get to work with it
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
-	# splains = smooth.spline(position, relativeIntensity)
-	# splains = spline(position, relativeIntensity)
-	# splains = spline(position, relativeIntensity, method = "natural")
-	# splains = smooth.spline(position, relativeIntensity, spar = 0.0001, all.knots=TRUE)
-	# splains = smooth.spline(position, relativeIntensity, df = 2, spar = 0.0001, all.knots = TRUE)
-	# splains = smooth.spline(position, relativeIntensity, df = 50, spar = 1e-7, all.knots = TRUE)
 	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
-	# print(splains)
 	# peaks = findpeaks(splains, minpeakdistance = 2, threshold = 0.1, npeaks = peakCount)
 	# print(peaks)
 }
@@ -132,28 +113,32 @@ plotData = function(i, data){
 	setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/plotoutput")
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
-	# print(position)
-	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
-	# fit1 = nls(relativeIntensity~(A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F),
-		# data=data, start=list("A"=0.0001, "B"=0.001, "C"=0.01,"D"=2, "E"=2, "F"=10))
+	# splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
+	fit1 = nls(relativeIntensity~(A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F),
+		data=data, start=list("A"=0.000001, "B"=0.00001, "C"=0.001,"D"=0.01, "E"=0.1, "F"=1))
+	# print(summary(fit1))
+
+	# fitfun = function(A,B,C,D,E,F,position){A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F}
 	# a1=coef(fit1)[1]
 	# print(fit1)
 	# print(splains)
 	# print(typeof(splains))
-	plot.new()
-	jpeg(paste('choprplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
-	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
-	# points(peakPositions, peaks, col = 'orangered', pch=19)
-	lines(splains, col = "purple", lwd = 2)
-	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
 
-	incrementY = round(max(relativeIntensity) / 10, digits = 2)
-	incrementX = round((max(position)-min(position)) / 10, digits = 3)
-	beginX = round(min(position), digits = 2)
-	abline(v=(seq(beginX, (max(relativeIntensity)+10), incrementX)), col="burlywood4", lty="dotted")
-	abline(h=(seq(0, (max(position)+10), incrementY)), col="burlywood4", lty="dotted")
-	dev.off()
-	return(splains)
+	# plot.new()
+	# jpeg(paste('choprplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
+	# plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
+	# # points(peakPositions, peaks, col = 'orangered', pch=19)
+	# lines(splains, col = "purple", lwd = 2)
+	# lines(fit1, col = "green", lwd = 2)
+	# title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
+
+	# incrementY = round(max(relativeIntensity) / 10, digits = 2)
+	# incrementX = round((max(position)-min(position)) / 10, digits = 3)
+	# beginX = round(min(position), digits = 2)
+	# abline(v=(seq(beginX, (max(relativeIntensity)+10), incrementX)), col="burlywood4", lty="dotted")
+	# abline(h=(seq(0, (max(position)+10), incrementY)), col="burlywood4", lty="dotted")
+	# dev.off()
+	# return(splains)
 }
 
 findPeaks = function(relativeIntensity, peakCount){
@@ -192,16 +177,33 @@ peakPositionsToPlot = function(peaks, position){
 	return(peakPositions)
 }
 
+peakFinder = function(data, relativeIntensity, position){
+	# max(relativeIntensity)
+	indexofmax = which.max(relativeIntensity)
+	# match(max(relativeIntensity), )
+	# print(indexofmax)
+	# print(position[indexofmax])
+}
 
-for (i in 1:length(alldata)){
+
+for (i in 1:2){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
-	name = sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])
-	print(name)
+	# print(alldata[i])
+	# print(interpretation)
 	data = processData()
-	setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/clearcsv")
-	write.csv(x=data, file=paste(sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])))
+	position = as.numeric(unlist(data[1]))
+	relativeIntensity = as.numeric(unlist(data[2]))
+	peaks = peakFinder(data, relativeIntensity, position)
+
+	# name = sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])
+	# print(name)
+	# data = processData()
+	# setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/clearcsv")
+	# write.csv(x=data, file=paste(sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])))
+	# plotData(i, data)
+
 	# peaks2 = approxData(data)
 	# peakData = findPeaks(data, 10)
 	# peakDataSplain = splineMagicBox(splains, 10)
