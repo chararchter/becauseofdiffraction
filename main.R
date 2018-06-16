@@ -114,30 +114,27 @@ plotData = function(i, data){
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
 	# splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
-	fit1 = nls(relativeIntensity~(A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F),
-		data=data, start=list("A"=0.000001, "B"=0.00001, "C"=0.001,"D"=0.01, "E"=0.1, "F"=1))
+	# fit1 = nls(relativeIntensity~(A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F),
+		# data=data, start=list("A"=0.000001, "B"=0.00001, "C"=0.001,"D"=0.01, "E"=0.1, "F"=1))
 	# print(summary(fit1))
-
 	# fitfun = function(A,B,C,D,E,F,position){A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F}
 	# a1=coef(fit1)[1]
 	# print(fit1)
-	# print(splains)
-	# print(typeof(splains))
 
-	# plot.new()
-	# jpeg(paste('choprplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
-	# plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
+	plot.new()
+	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
+	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
 	# # points(peakPositions, peaks, col = 'orangered', pch=19)
 	# lines(splains, col = "purple", lwd = 2)
 	# lines(fit1, col = "green", lwd = 2)
-	# title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
+	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
 
 	# incrementY = round(max(relativeIntensity) / 10, digits = 2)
 	# incrementX = round((max(position)-min(position)) / 10, digits = 3)
 	# beginX = round(min(position), digits = 2)
 	# abline(v=(seq(beginX, (max(relativeIntensity)+10), incrementX)), col="burlywood4", lty="dotted")
 	# abline(h=(seq(0, (max(position)+10), incrementY)), col="burlywood4", lty="dotted")
-	# dev.off()
+	dev.off()
 	# return(splains)
 }
 
@@ -223,12 +220,16 @@ calculateResults = function(d, diffMax, L){
 	cal_lambda = (d * diffMax) / (L * 1)
 }
 
-for (i in 1:2){
+g_lambdas = c()
+r_lambdas = c()
+
+for (i in 1:length(alldata)){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
-	print(alldata[i])
-	print(interpretation)
+	# print(alldata[i])
+	# print(interpretation)
+	# print(interpretation[1])
 	d = as.numeric(interpretation[3])/100
 	data = processData()
 	position = as.numeric(unlist(data[1]))
@@ -236,30 +237,35 @@ for (i in 1:2){
 	lambda = determineLambda(interpretation[1])
 	# print(lambda)
 	L = as.numeric(interpretation[4])
-	print(L)
+	# print(L)
 	linSep = determineLinearSeparation(L, d, lambda)
 	# print(linSep)
 	peaks = peakFinder(data, relativeIntensity, position, linSep)
-	print(peaks)
+	# print(peaks)
 	maximums = peaks[, 'maximums']
 	diffMax = abs(maximums[1] - maximums[2])
-	print(diffMax)
+	# print(diffMax)
 	cal_lambda = calculateResults(d, diffMax, L)
-	print(cal_lambda)
-	# name = sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])
+	# print(cal_lambda)
+
+	if (interpretation[1] == 'g'){
+		g_lambdas = c(g_lambdas, cal_lambda)
+	}
+	else{
+		r_lambdas = c(r_lambdas, cal_lambda)
+	}
+
+	plots = plotData(i, data)
+
+	# write to csv
+	# name = sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2],
+		# interpretation[3], interpretation[4], interpretation[5])
 	# print(name)
 	# data = processData()
 	# setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/clearcsv")
-	# write.csv(x=data, file=paste(sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])))
-	# plotData(i, data)
-
-	# peaks2 = approxData(data)
-	# peakData = findPeaks(data, 10)
-	# peakDataSplain = splineMagicBox(splains, 10)
-	# peaks = peakData[,1]
-	# position = as.numeric(unlist(data[1]))
-	# peakPositions = peakPositionsToPlot(peakData, position)
-	# print(peaks)
-	# print(peakPositions)
-	# plotData(i, data)
+	# write.csv(x=data, file=paste(sprintf("%s%s%s%s%s.csv", interpretation[1],
+		# interpretation[2], interpretation[3], interpretation[4], interpretation[5])))
 }
+
+print(g_lambdas)
+print(r_lambdas)
