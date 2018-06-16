@@ -1,6 +1,6 @@
-getwd()
+# getwd()
 setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/4data")
-getwd()
+# getwd()
 
 alldata = list.files(pattern="*.csv")
 # print(length(alldata))
@@ -43,9 +43,11 @@ filenameInterpret = function(filename){
 processData = function(){
 	position = (filename[, 'position'])
 	relativeIntensity = (filename[, 'relativeIntensity'])
-	dataRaw = data.frame(position, relativeIntensity)
+	data = data.frame(position, relativeIntensity)
 	# get rid of rows with NA
-	data = na.omit(dataRaw)
+	data = na.omit(data)
+	# sort according to position
+	data = data[with(data, order(position)), ]
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
 	# get index of the maximum position
@@ -62,8 +64,6 @@ processData = function(){
 	relativeIntensity = relativeIntensity[begin:end]
 	position = position[begin:end]
 	data = data.frame(position, relativeIntensity)
-	# sort according to position
-	data = data[with(data, order(position)), ]
 	position = data[, 'position']
 	relativeIntensity = data[, 'relativeIntensity']
 	# filter out noise - small relative intensities at the begining and end
@@ -99,6 +99,32 @@ processData = function(){
 	data = data.frame(position, relativeIntensity)
 }
 
+movingAverage2 = function(y, n=5){
+# Smoothed symmetrically:
+# average of current sample, n future samples, and n past samples (blue)
+	f21 = rep(1/n,n)
+	y_sym = filter(y, f21, sides=2)
+	return(y_sym)
+}
+
+processData2 = function(data){
+	position = (filename[, 'position'])
+	relativeIntensity = (filename[, 'relativeIntensity'])
+	data = data.frame(position, relativeIntensity)
+# get rid of rows with NA
+	data = na.omit(data)
+	data = data[with(data, order(position)), ]
+	# position = data[, 'position']
+	# relativeIntensity = data[, 'relativeIntensity']
+	# mapos = movingAverage(data[, 'position'])
+	# maint = movingAverage(data[, 'relativeIntensity'])
+	# data2 = data.frame(mapos, maint)
+	# print(head(data2))
+	# print(head(data))
+	return(data)
+}
+
+
 approxData = function(data){
 	# currently disabled. wanted to migrate spline from plot to get to work with it
 	position = as.numeric(unlist(data[1]))
@@ -109,11 +135,13 @@ approxData = function(data){
 }
 
 
-plotData = function(i, data){
+plotData = function(i, data, aveIntensity, peaks){
 	setwd("/home/vika/Documents/uni/4sem/LAB_4/4-Gaismas-interference/plotoutput")
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
-	# splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
+	indexofmaximums = as.numeric(unlist(peaks[2]))
+	maximums = as.numeric(unlist(peaks[1]))
+	splains = smooth.spline(position, relativeIntensity, spar = 1e-7, tol = 1e-6)
 	# fit1 = nls(relativeIntensity~(A*position^5 + B*position^4 + C*position^3 + D*position^2 + E*position + F),
 		# data=data, start=list("A"=0.000001, "B"=0.00001, "C"=0.001,"D"=0.01, "E"=0.1, "F"=1))
 	# print(summary(fit1))
@@ -121,19 +149,26 @@ plotData = function(i, data){
 	# a1=coef(fit1)[1]
 	# print(fit1)
 
+	peakpos = c()
+	for (k in indexofmaximums){
+		peakposnew = relativeIntensity[k]
+		# print(peakposnew)
+		peakpos = c(peakpos, peakposnew)
+	}
+	# print(peaks)
+
+	# print('wtf')
+	# print(peakpos)
+	# print('wtff')
+	# print(maximums)
 	plot.new()
 	jpeg(paste('rplot', toString(i), '.jpeg', sep=""), width = 1000, height = 500, units = "px", pointsize = 15)
 	plot(position, relativeIntensity, col="gray35", xlab = "Position", ylab ="Relative intensity")
-	# # points(peakPositions, peaks, col = 'orangered', pch=19)
-	# lines(splains, col = "purple", lwd = 2)
-	# lines(fit1, col = "green", lwd = 2)
+	lines(splains, col = "blue", lwd = 2)
+	lines(position, aveIntensity, col = "purple", lwd = 2)
+	points(maximums, peakpos, col = 'orangered', pch=19)
 	title(main = 'Junga dubultsprauga', cex.main = 2, font.main= 4, col.main= "black")
-
-	# incrementY = round(max(relativeIntensity) / 10, digits = 2)
-	# incrementX = round((max(position)-min(position)) / 10, digits = 3)
-	# beginX = round(min(position), digits = 2)
-	# abline(v=(seq(beginX, (max(relativeIntensity)+10), incrementX)), col="burlywood4", lty="dotted")
-	# abline(h=(seq(0, (max(position)+10), incrementY)), col="burlywood4", lty="dotted")
+	grid()
 	dev.off()
 	# return(splains)
 }
@@ -222,7 +257,8 @@ calculateResults = function(d, diffMax, L){
 
 g_lambdas = c()
 r_lambdas = c()
-
+baddata = c(12, 20, 21, 22, 23, 24, 25, 33, 34, 35, 36)
+# length(alldata)
 for (i in 1:length(alldata)){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
@@ -231,9 +267,11 @@ for (i in 1:length(alldata)){
 	# print(interpretation)
 	# print(interpretation[1])
 	d = as.numeric(interpretation[3])/100
-	data = processData()
+	data = processData2()
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
+	aveIntensity = movingAverage2(data[, 'relativeIntensity'])
+
 	lambda = determineLambda(interpretation[1])
 	# print(lambda)
 	L = as.numeric(interpretation[4])
@@ -241,6 +279,7 @@ for (i in 1:length(alldata)){
 	linSep = determineLinearSeparation(L, d, lambda)
 	# print(linSep)
 	peaks = peakFinder(data, relativeIntensity, position, linSep)
+	# peaks = peakFinder(data, aveIntensity, position, linSep)
 	# print(peaks)
 	maximums = peaks[, 'maximums']
 	diffMax = abs(maximums[1] - maximums[2])
@@ -248,14 +287,20 @@ for (i in 1:length(alldata)){
 	cal_lambda = calculateResults(d, diffMax, L)
 	# print(cal_lambda)
 
-	if (interpretation[1] == 'g'){
-		g_lambdas = c(g_lambdas, cal_lambda)
+	for (k in baddata){
+		if (k == i){
+			break
+		}
+		else if (interpretation[1] == 'g'){
+			g_lambdas = c(g_lambdas, cal_lambda)
+			break
+		}
+		else{
+			r_lambdas = c(r_lambdas, cal_lambda)
+			break
+		}
 	}
-	else{
-		r_lambdas = c(r_lambdas, cal_lambda)
-	}
-
-	plots = plotData(i, data)
+	plots = plotData(i, data, aveIntensity, peaks)
 
 	# write to csv
 	# name = sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2],
@@ -267,5 +312,20 @@ for (i in 1:length(alldata)){
 		# interpretation[2], interpretation[3], interpretation[4], interpretation[5])))
 }
 
+
 print(g_lambdas)
 print(r_lambdas)
+
+theor_g_lambda = determineLambda('g')
+theor_r_lambda = determineLambda('r')
+
+r_relerror = mean(r_lambdas) / theor_r_lambda * 100
+g_relerror = mean(g_lambdas) / theor_g_lambda * 100
+
+print('Red')
+sprintf("Theoretical wavelength is %e, calculated wavelength is %e", theor_r_lambda, mean(r_lambdas))   
+sprintf("Accuracy %.2f %%, standart deviation %.2e", r_relerror, sd(r_lambdas))
+
+print('Green')
+sprintf("Theoretical wavelength is %e, calculated wavelength is %e", theor_g_lambda, mean(g_lambdas))   
+sprintf("Accuracy %.2f %%, standart deviation %.2e", g_relerror, sd(g_lambdas))  
