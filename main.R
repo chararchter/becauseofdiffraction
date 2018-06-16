@@ -199,7 +199,6 @@ peakFinder = function(data, relativeIntensity, position, linSep){
 
 	# problem - what to do if there is no this exact position?
 	# find closest existing position to newposition
-
 	if (is.na(indexofmin)){
 		indexofmin = which.min(abs(position - newposition))
 		# print(indexofmin)
@@ -208,13 +207,21 @@ peakFinder = function(data, relativeIntensity, position, linSep){
 	else {
 		min1 = position[indexofmin]
 	}
-	print(min1)
-	print(indexofmin)
-
+	# print(min1)
+	# print(indexofmin)
 	position = position[1:indexofmin]
 	relativeIntensity = relativeIntensity[1:indexofmin]
+	indexofmax2 = which.max(relativeIntensity)
+	max2 = position[indexofmax2]
+	maximums = c(max1, max2)
+	indexofmaximums = c(indexofmax, indexofmax2)
+	data_peaks = data.frame(maximums, indexofmaximums)
+	return(data_peaks)
 }
 
+calculateResults = function(d, diffMax, L){
+	cal_lambda = (d * diffMax) / (L * 1)
+}
 
 for (i in 1:2){
 	# izsauc visas funkcijas
@@ -222,19 +229,23 @@ for (i in 1:2){
 	interpretation = filenameInterpret(alldata[i])
 	print(alldata[i])
 	print(interpretation)
-	# print(interpretation[3])
 	d = as.numeric(interpretation[3])/100
-	# print(data)
 	data = processData()
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
 	lambda = determineLambda(interpretation[1])
 	# print(lambda)
 	L = as.numeric(interpretation[4])
+	print(L)
 	linSep = determineLinearSeparation(L, d, lambda)
 	# print(linSep)
 	peaks = peakFinder(data, relativeIntensity, position, linSep)
-
+	print(peaks)
+	maximums = peaks[, 'maximums']
+	diffMax = abs(maximums[1] - maximums[2])
+	print(diffMax)
+	cal_lambda = calculateResults(d, diffMax, L)
+	print(cal_lambda)
 	# name = sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])
 	# print(name)
 	# data = processData()
