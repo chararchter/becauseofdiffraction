@@ -177,12 +177,54 @@ peakPositionsToPlot = function(peaks, position){
 	return(peakPositions)
 }
 
-peakFinder = function(data, relativeIntensity, position){
+determineLambda = function(color){
+	if (color == 'g'){
+		lambda = 532 * 10^(-9)
+	}
+	else{
+		lambda = 650 * 10^(-9)
+	}
+}
+
+determineLinearSeparation = function(L, d, lambda){
+	linSep = L * lambda / d
+}
+
+
+peakFinder = function(data, relativeIntensity, position, linSep){
 	# max(relativeIntensity)
 	indexofmax = which.max(relativeIntensity)
-	# match(max(relativeIntensity), )
+	max1 = position[indexofmax]
+	# match(max(relativeIntensity), relativeIntensity)
+	print(max1)
 	# print(indexofmax)
 	# print(position[indexofmax])
+	newposition = max1 - (linSep/2)
+	print(newposition)
+	indexofmin = match(newposition, position)
+	# problem - if there is no this exact position, what to do? tolerance criteria
+	# print('wtf')
+	# print(length(indexofmin))
+	# print(is.na(indexofmin))
+	if (is.na(indexofmin)){
+		posTol = seq(newposition-0.001, newposition+0.001, by=0.0001)
+		# max2 = mean(posTol)
+		for (i in posTol){
+			print(i)
+			indexofmin = match(i, position)
+			if (!is.na(indexofmin) == TRUE){
+				break
+			}
+		}
+	}
+	else {
+		max2 = position[indexofmin]
+	}
+	# print(max2)
+	print(indexofmin)
+
+	# position = position[1:indexofmin]
+	# relativeIntensity = relativeIntensity[1:indexofmin]
 }
 
 
@@ -190,12 +232,20 @@ for (i in 1:2){
 	# izsauc visas funkcijas
 	filename = csvInput(i)
 	interpretation = filenameInterpret(alldata[i])
-	# print(alldata[i])
-	# print(interpretation)
+	print(alldata[i])
+	print(interpretation)
+	# print(interpretation[3])
+	d = as.numeric(interpretation[3])/100
+	# print(data)
 	data = processData()
 	position = as.numeric(unlist(data[1]))
 	relativeIntensity = as.numeric(unlist(data[2]))
-	peaks = peakFinder(data, relativeIntensity, position)
+	lambda = determineLambda(interpretation[1])
+	# print(lambda)
+	L = as.numeric(interpretation[4])
+	linSep = determineLinearSeparation(L, d, lambda)
+	# print(linSep)
+	peaks = peakFinder(data, relativeIntensity, position, linSep)
 
 	# name = sprintf("%s%s%s%s%s.csv", interpretation[1], interpretation[2], interpretation[3], interpretation[4], interpretation[5])
 	# print(name)
