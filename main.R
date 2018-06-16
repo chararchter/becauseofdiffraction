@@ -192,39 +192,27 @@ determineLinearSeparation = function(L, d, lambda){
 
 
 peakFinder = function(data, relativeIntensity, position, linSep){
-	# max(relativeIntensity)
 	indexofmax = which.max(relativeIntensity)
 	max1 = position[indexofmax]
-	# match(max(relativeIntensity), relativeIntensity)
-	print(max1)
-	# print(indexofmax)
-	# print(position[indexofmax])
 	newposition = max1 - (linSep/2)
-	print(newposition)
 	indexofmin = match(newposition, position)
-	# problem - if there is no this exact position, what to do? tolerance criteria
-	# print('wtf')
-	# print(length(indexofmin))
-	# print(is.na(indexofmin))
+
+	# problem - what to do if there is no this exact position?
+	# find closest existing position to newposition
+
 	if (is.na(indexofmin)){
-		posTol = seq(newposition-0.001, newposition+0.001, by=0.0001)
-		# max2 = mean(posTol)
-		for (i in posTol){
-			print(i)
-			indexofmin = match(i, position)
-			if (!is.na(indexofmin) == TRUE){
-				break
-			}
-		}
+		indexofmin = which.min(abs(position - newposition))
+		# print(indexofmin)
+		min1 = position[indexofmin] 
 	}
 	else {
-		max2 = position[indexofmin]
+		min1 = position[indexofmin]
 	}
-	# print(max2)
+	print(min1)
 	print(indexofmin)
 
-	# position = position[1:indexofmin]
-	# relativeIntensity = relativeIntensity[1:indexofmin]
+	position = position[1:indexofmin]
+	relativeIntensity = relativeIntensity[1:indexofmin]
 }
 
 
