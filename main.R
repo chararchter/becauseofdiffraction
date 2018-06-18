@@ -256,6 +256,12 @@ for (i in 1:length(alldata)){
 	cal_lambda = calculateResults(d, diffMax, L)
 	# print(cal_lambda)
 
+	# print(is.element(i, baddata)) 
+
+	# if (is.element(i, baddata)){
+	# 	break
+	# }
+
 	for (k in baddata){
 		if (k == i){
 			break
@@ -269,6 +275,7 @@ for (i in 1:length(alldata)){
 			break
 		}
 	}
+
 	plots = plotData(i, data, aveIntensity, peaks, interpretation)
 
 	# write to csv
@@ -286,7 +293,7 @@ print('Red')
 print(r_lambdas)
 print('Green')
 print(g_lambdas)
-
+print(length(g_lambdas) + length(r_lambdas))
 theor_g_lambda = determineLambda('g')
 theor_r_lambda = determineLambda('r')
 
